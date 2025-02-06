@@ -25,7 +25,7 @@ Notes:
 - Special handling for models like TResNet and DLA to ensure correct feature indexing.
 - VGG-style models use `_is_vgg_style` to align scale-1 features with standard outputs.
 """
-
+import warnings
 from typing import Any
 
 import timm
@@ -118,7 +118,10 @@ class TimmUniversalEncoder(nn.Module):
             self._is_transformer_style = False
             self._is_vgg_style = True
         else:
-            raise ValueError("Unsupported model downsampling pattern.")
+            self._is_transformer_style = True
+            self._is_vgg_style = False
+            warnings.warn('Building Unsupported Encoder: (Unsupported model downsampling pattern)')
+            # raise ValueError("Unsupported model downsampling pattern.")
 
         if self._is_transformer_style:
             # Transformer-like models (start at scale 4)
