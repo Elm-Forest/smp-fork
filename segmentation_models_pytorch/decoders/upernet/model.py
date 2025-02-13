@@ -1,14 +1,16 @@
 from typing import Any, Optional, Union
 
+from torch import nn
+
 from segmentation_models_pytorch.base import (
     ClassificationHead,
     SegmentationHead,
     SegmentationModel,
 )
-from segmentation_models_pytorch.encoders import get_encoder
 from segmentation_models_pytorch.base.hub_mixin import supports_config_loading
-
+from segmentation_models_pytorch.encoders import get_encoder
 from .decoder import UPerNetDecoder
+from ..compressnet import CompressionNet
 
 
 class UPerNet(SegmentationModel):
@@ -52,20 +54,21 @@ class UPerNet(SegmentationModel):
 
     @supports_config_loading
     def __init__(
-        self,
-        encoder_name: str = "resnet34",
-        encoder_depth: int = 5,
-        encoder_weights: Optional[str] = "imagenet",
-        decoder_pyramid_channels: int = 256,
-        decoder_segmentation_channels: int = 64,
-        in_channels: int = 3,
-        classes: int = 1,
-        activation: Optional[Union[str, callable]] = None,
-        aux_params: Optional[dict] = None,
-        **kwargs: dict[str, Any],
+            self,
+            encoder_name: str = "resnet34",
+            encoder_depth: int = 5,
+            encoder_weights: Optional[str] = "imagenet",
+            decoder_pyramid_channels: int = 256,
+            decoder_segmentation_channels: int = 64,
+            in_channels: int = 3,
+            classes: int = 1,
+            activation: Optional[Union[str, callable]] = None,
+            aux_params: Optional[dict] = None,
+            compress: bool | int = False,
+            **kwargs: dict[str, Any],
     ):
         super().__init__()
-
+        self.compress = CompressionNet(in_channels) if compress else nn.Identity()
         self.encoder = get_encoder(
             encoder_name,
             in_channels=in_channels,

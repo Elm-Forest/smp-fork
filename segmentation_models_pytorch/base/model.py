@@ -1,5 +1,6 @@
-import torch
 from typing import TypeVar, Type
+
+import torch
 
 from . import initialization as init
 from .hub_mixin import SMPHubMixin
@@ -58,10 +59,10 @@ class SegmentationModel(torch.nn.Module, SMPHubMixin):
         """Sequentially pass `x` trough model`s encoder, decoder and heads"""
 
         if not (
-            torch.jit.is_scripting() or torch.jit.is_tracing() or is_torch_compiling()
+                torch.jit.is_scripting() or torch.jit.is_tracing() or is_torch_compiling()
         ):
             self.check_input_shape(x)
-
+        x = self.compress(x)
         features = self.encoder(x)
         decoder_output = self.decoder(features)
 
